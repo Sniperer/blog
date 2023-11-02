@@ -3,4 +3,5 @@ description: Hello Wolrd.!
 theme: just-the-docs
 domain: 2nxh.com
 url: https://2nxh.com
-
+kramdown:
+  math_engine: null
