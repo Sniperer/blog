@@ -2,8 +2,8 @@
 layout: default
 title: Multiparty Computation
 parent: Cryptology
-nav_order: 3
-has_children: True
+grand_parent: Notes
+nav_order: 0
 ---
 # background
 The fundamental question: Can we compute a result that depends on private data from all involved parties without relying on a trusted party?
