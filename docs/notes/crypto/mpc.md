@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Multiparty Computation
-parent: Notes
+parent: Cryptology
 nav_order: 3
 has_children: True
 ---
@@ -47,4 +47,4 @@ simulation argument
 
 分析沸羊羊的需要，他想要计算$f = ab$，其中$a$是美羊羊是否愿意约会，$b$是沸羊羊的意愿。愿意为1，不愿意为0。那么对于沸羊羊来说，如果可以在不泄露$b$的情况下计算出$f$，他的目的便会达到。因为一旦美羊羊不愿意约会就意味着$f$恒为零，她无法以此推理出沸羊羊是舔狗还是海王。
 
-我们可以使用Protocol Secure Multiplication完成安全的计算。但值得一提的是理论存在局限，美羊羊不会接受沸羊羊的邀约。XD
+我们可以使用Protocol Secure Multiplication完成安全的计算。但值得一提的是理论存在局限，美羊羊可能连零都懒得按。XD
