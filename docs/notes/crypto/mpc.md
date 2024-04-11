@@ -37,7 +37,7 @@ Thus, the model is: the parties $P_1, ..., P_n$. Each party holds a secret input
 
 #### 正式的证明
 
-simulation argument
+simulation argument：给定一个player的输入输出，存在PPT可以模拟出在协议中该player所见的全部信息，或者说模拟出相同的信息分布。
 
 ## More than addition
 
@@ -53,11 +53,11 @@ simulation argument
 
 ## variation
 
-一个自然的问题是，如果player并不遵守规则，我们能否发现或限制。一种违反规则是，某一个player就不想计算出结果，他一直提供错误的input。这种问题是没有办法从协议上避免的，但我们可以用博弈论的效用设计，此处超纲。一个例子是，美羊羊知道了沸羊羊使用安全约会技术，所以美羊羊一直点同意但一直不赴约，只为一探沸羊羊内心。另一种，也是我们主要探讨的是，player不按照协议的指令做事，例如在addition种，他向$P_2, P_3$传递不同的$x_1$。但这种恶意行为可以被解决，我们让$P_2, P_3$交换$P_1$就限制了这种行为。这也是为什么我们在addition阶段提供两个share而不是一个。同样的，在loaclly compute $s_2$之后，$P_1$同样可以恶意的提供一个错误的值，但由于$P_3$也同样计算了$s_2$，这种恶意行为也会被避免。
+一个自然的问题是，如果player并不遵守规则，我们能否发现或限制。一种违反规则是，某一个player就不想计算出结果，他一直提供错误的input。这种问题是没有办法从协议上避免的，但我们可以用博弈论的效用设计，此处超纲。一个例子是，美羊羊知道了沸羊羊使用安全约会技术，所以美羊羊一直点同意但一直不赴约，只为一探沸羊羊内心。另一种，也是我们主要探讨的是，player不按照协议的指令做事，例如在addition中，他向$P_2, P_3$传递不同的$x_1$。但这种恶意行为可以被解决，我们让$P_2, P_3$交换$P_1$就限制了这种行为。这也是为什么我们在addition阶段提供两个share而不是一个。同样的，在loaclly compute $s_2$之后，$P_1$同样可以恶意的提供一个错误的值，但由于$P_3$也同样计算了$s_2$，这种恶意行为也会被避免。
 
 ## More than 3 players
 
-本阶段的讨论依然假设所有player会遵循protocol的指令行事，哪怕是恶意player。我们称这种安全为semi-honest或者passive security。
+本阶段的讨论依然假设所有player会遵循protocol的指令行事，哪怕是恶意player。我们称这种安全为semi-honest或者passive security。确切的是，对于Corrut players $t < n/2$，注意是严格小于。
 
 ### secret sharing for more players
 
@@ -68,4 +68,47 @@ simulation argument
 首先要明确要证明的论断是，如果uniformly random的选取t次多项式，那么对于至多t个人的恶意行为是安全的。不安全是指，$C$是作弊用户集合，这些用户获得了$(h(i))_{i \in C}$，这些用户会猜到$s$分布的一些信息。
 
 从数学角度讲，如果在一个空间上的一个均匀分布能一一映射到另一个等大的空间上，那么在新空间上的分布也是均匀的。以此，不难得出证明成立。多项式各项系数$(a_j)_{j\leq t}$在给定$s$和$C$的情况下，一一映射到$(h(i))_{i \in C}$。多项式系数均匀选择，则每个player接受到的sharing也同样是均匀选择的，不包含$s$的任何信息。QED
+
+### arithmetic circuits
+
+三种gate：add, multipy, multipy-by-constant
+
+### CEPS
+
+主体上是组合上述门电路，特别的是，multipy会使polynomial由t次变为2t次，多次的multipy会使polynomial超出n-1次，从而拉格朗日插值失效，因此我们需要在完成乘法之后，此时各方share了新的秘密，在不泄露秘密的情况下，重建一个新的polynomial。
+
+假定我们想要计算$[a;f_a]_t * [b;f_b]_t = [ab;f_af_b]_{2t}$。此时每个玩家已经被分配了$[a;f_a]_t, [b;f_b]_t$，每个player计算出$a_{i}b_{i}$，我们令其为$h(i)$，但我们不能直接用$(i,h(i))$插值出$h$，因为 $h$ degree是$2t$，我们固然可以计算出全部$n$个点$((i,h(i)))_{i<=n}$(方法就是$a_j = \sum_{i \in C} \delta_i(j)h(i)$，同理计算出b，得到$h(j)$)，但degree的倍增，使得这种策略难以为继。注意到，$h(0)=\sum_{i=1}^n \delta_i(0)h(i)$，由于h本身就是$2t$的，这里必须要用到n个点，但我们只需要计算出来$h(0)$，并不需要秘密继续以2t多项式的形式共享。
+
+因此，我们让每个player i 分发一个新的多项式$[h(i);f_{h(i)}]_t$。定义$(r_i)_{i \leq n} = (\delta_i(0))_{i \leq n}$。我们有$\sum_{i=1}^n r_i[h(i);f_{h(i)}] = \sum_{i=1}^n [r_ih(i);r_if_{h(i)}]=[ab;\sum_{i=1}^nr_if_{f(i)}]_t$。如此，在计算出乘法的同时，使得share的多项式继续保持t degree。
+
+#### proof
+
+1. correctness: 不难看出
+2. privacy: 亦不难证明。Intuitively，我们将所有操作分成两种类型，第一类是input sharing和multiplication gate，其实也就是不使用output y，我们就能模拟的操作，第二类是output reconstruction，就是使用output y，我们可以推理出在该操作中，corrupt players所见的全部信息。
+
+不过，只讲直觉，实在有违理论的优雅美感。
+
+#### formalizing proof
+
+分两步证明，首先把上述两类操作定义清楚。
+
+1. 定义了一个函数$\text{Strip(view}_j\text{)}$。作用就是，剔除掉诚实用户的sharing，恶意用户输出的distribution.证明的方法就是，给定两个输入向量，其中只用corrupted players的输入相同，如此证明$\{\text{Strip(view}$ $_{j}^{0}\text{))}\}_{P_j \in C}$ $=\{\text{Strip(view}$ $_{j}^{1}\text{))}\}_{P_j \in C}$。逐gate证明，核心就是对于一个t次的多项式，至少需要t+1个点可以插值出原多项式，同时只给定t个点，无法或者任何有关原多项式截距的信息，即uniform distribution。也用到了数学归纳法。
+
+2. 再定义函数$\text{Dress}_{\textbf{y}_C}$，输入一个被剥夺的Strip(View)，和协议输出，可以补全view。因为多了一个点$(0,y_j)$，所以可以正确补全。
+
+然后，定义simulator S:
+1. The input to $S$ is $\{x_j, y_j\}_{j \in C}$
+2. It defines a global input vector $x^{0} = (x_1^{0}, ..., x_n^{0})$, where $x_j^0 = x_j$ if $P_j \in C$ and $x_j^0 = 0$ otherwise.
+3. It runs CEPS on $x^0$
+4. Outputs $\text{Dress}_{\textbf{y}_C}\text{(\{Strip(view}_j^0\text{)\}}_{P_j \in C}$ 
+
+$\lvert C\rvert = t$很好证明，$\lvert C\rvert < t$需要特殊注意。*如果有空，可以证明一下*。
+
+## optimal bound of corruption
+
+如果我们想计算所有函数，$t < n/2$是最佳的bound了，因为在这种情况下，我们证明了可以计算算术电路，一旦超过这个bound，哪怕是简单的AND电路都不可安全计算。
+
+证明亦没有难度。
+
+
 
