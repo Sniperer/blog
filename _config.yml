@@ -5,3 +5,7 @@ domain: 2nxh.com
 url: https://2nxh.com
 kramdown:
   math_engine: null
+
+# Google Analytics Tracking
+ga_tracking: G-JNHS6T6WT2
+ga_tracking_anonymize_ip: true
