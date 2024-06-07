@@ -1,9 +1,9 @@
 ---
 layout: default
 title: Zero-knowledge Proof
-parent: Notes
-nav_order: 3
-has_children: True
+parent: Cryptology
+grand_parent: Notes
+nav_order: 0
 ---
 # User identification problem
 
