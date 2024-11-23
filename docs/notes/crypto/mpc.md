@@ -1,9 +1,9 @@
 ---
-layout: default
-title: Multiparty Computation
-parent: Cryptology
-grand_parent: Notes
-nav_order: 0
+LAYOUT: DEFAULT
+TITLE: MULTIPARTY COMPUTATION
+PARENT: CRYPTOLOGY
+GRAND_PARENT: NOTES
+NAV_ORDER: 0
 ---
 # background
 The fundamental question: Can we compute a result that depends on private data from all involved parties without relying on a trusted party?
@@ -128,5 +128,44 @@ robust的定义非常很有趣。之前，已经提过input substitution是不�
 
 书上的例子非常生动，多余的解释都是添足。
 
+### sketch of UC model
 
+实际上大部分是为了补充安全的细节，并不设计technical的证明。模型抽象的非常好，不知道是谁提出来的，novelty拉满。
 
+#### 细节一：异步和同步
+
+在此之前，我们定义的所有协议都是异步的，或者说消息驱动的，很难说这不存在问题。在直觉上，如果我们有两层的交换协议，而第二层要交换的数据基于第一层协议的结果，或者某一部分的结果，某一方猛猛算，把两层都算完了，然后按照协议把数据发送到还在进行第一层计算的用户，这安全吗，这不安全吗，所以我们需要添加clock，才能把这个问题很好的建模。
+
+不仅仅如此，这里面更涉及到拜占庭通信的问题。将军A要给将军B发送情报，将军A怎么知道将军B接收到情报了吗。具体的说，$P_1$尝试和$P_2$进行CEPS协议，如果我们不要求同时，也就是同一个clock内，$P_1,P_2$都获取输出，一种可能的情况是$P_2$是诚实的用户，这个时候$P_1$应该等待$P_2$的回传，因为诚实的用户会按照协议执行，$P_1$知道他不是不回消息，只是没看手机，那么就会继续等待。但另一种情况是$P_2$是恶意用户，他偏离了协议，就是不回消息，这个时候$P_1$不能继续等待，否则协议死锁。$P_1$是诚实的用户所以不知道$P_2$是不是诚实的用户，所以没法在避免input deprivation的情况下，容忍active corruption。我们可以看到这种针对拜占庭式通信的设计，出现在了非常多的agent中。
+
+这里面还有一个大坑，但被假设避开了，我们要求所有的clocked组件必须是有响应的，也就是每有一个激活信号，必须有返回值。以此，我们便可以让组件递归调用组件。否则我们无法说明递归会终止，详见PL角度的可计算性。此外，还有一个小坑，我们假设每个组件必须以多项式时间返回值。以此，我们可以归纳地证明，多项式次数的递归调用，是多项式时间。这个假设太强了，所以这个结论除此之外没有用。
+
+#### 细节二：通信安全
+
+增加了一个专门负责communicate的agent R。为了建模攻击者不按照协议行为，我们有R.infl，对于攻击者在通信过程中的view，我们有R.leak。
+
+##### 举个例子
+
+首先我们需要定义好，什么是理想中的可行的安全通信，必要的条件应该包含：身份认证，通信双方能确保是和对方通信；不可修改；通信内容第三者不可理解。也就是说，第三者监听这个信道，即使明文传输，也无法理解。
+
+authenticated channel，我们确保身份认证，但无法抵抗窃听，也就是，明文传输在该信道可以泄露。
+
+然后，我们可以考虑一个简单的功能，两方交换信息。
+
+在安全的信道中，我们用$F_{st}$建模上述功能，不使用协议并在绝对安全的信道下意味着，信道会泄露的信息包括$(mid, i, j, \lvert m \rvert)$。这里有必要解释下，为什么在安全信道内，依旧会向窃听者泄露这些内容。$mid$指本次交换的编号，两方input的mid相同代表他们俩进行交换用以区分不同的交换msg。$(mid, i, j)$必然泄露，因为监听者不用理解内容，但能发现发送msg的双方，举个例子，双方飞鸽传书，第三者不能把鸽子打下来，但可以追踪鸽子在哪起飞，在哪降落，他们彼此是第几次通信。同时，如果把一个bit当作一个信封，他还能掌握鸽子腿上绑了几个信封。当然，我们可以加盐，让一个鸽子绑100个信封，但我们的前提是不使用协议。
+
+那么在不安全的信道中，具体说，是仅保证身份认证的信道中，我们用$F_{at}$建模，在不使用协议且信道仅保证身份认证的情况下，信道泄露的信息包括$(mid, i, j, m)$。很明显，我们使用$F_{st}$模拟需要$2^{\lvert m \rvert}$时间，因此不符合我们定义的安全，所以，我们需要额外的协议使得$\pi \diamond F_{at}$等价$F_{st}$。$\pi$使用公钥加密了明文，如此通过信道泄露的信息应该包括$(mid, i, j, e_k, c)$。该信息的分布，可以被$F_{st}$模拟，这一点被公钥加密系统保证，因此数学上等价。但在这里的模型中，输入输出口也需要完全相同，因此再套个simulator组件然后等价。simulator保证他自己不会腐败，也保证不会吞时钟信号。
+
+除此之外，我们需要在这两种模型中，模拟作弊。$F_{st}$的被动作弊意味这在leak上泄露参与方$i$已有的全部内部状态，包括输入输出。主动作弊意味着，不仅获取已有的内部状态，同时可以执行input substitution。$\pi \diamond F_{at}$包含两部分，协议和信道或者叫resource agent，大差不差。resource agent打开infl口接收输入信号，递归打开相应play的协议infl口接收下一信号。如果是被动攻击，回传内部状态，如果是主动攻击，回传内部状态并等待infl口信号的input substitution攻击指令。
+
+### 等价划分与不可区分类
+
+从集合论的角度理解不可区分类。符号太难打了。使用等价关系$R(x)$:给定$IS_0$和$IS_1$, 使得$x \diamond IS_0$ 和 $x \diamond IS_1$ statistical indistinguishable。将enviornment集合划分出等价类，称为Env。再使用等价关系$R(x)$:给定Env, 使得$\diamond x$是Env上的闭包运算。将IS集合划分出等价类Env $\diamond$.
+
+### UC theorem
+
+好像很trivial啊。
+
+### Homomorphic Commitments
+
+在ideal functionality中可以看到，在commit，open等指令下，如果corruption player能在在output到达之前合法input，则正常执行，否则fail。正是为了解决拜占庭通信的问题。

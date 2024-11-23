@@ -43,4 +43,6 @@ Note that Sv* can rewrite the conversion, but (P, V*) must generate conversion w
 
 # proof
 
+其实这个设计的原则就是，我们准备一些问题，同时这个问题集合的大小是polynomial，欺骗者无法回答全部问题。但simulator可以通过rewinding的手段，准备好问题的答案。如果这个问题的集合过大，将使rewind失效，因为会超polynomial，就像schnorr protocol。
+
 # A zero-knowledge proof system: Graph NonIsomorphism
