@@ -63,15 +63,18 @@ The span of a lattice $L(B)$ is the linear space spanned by its vectors, $span(L
 Let $\Lambda$ be a lattice of rank n, and let $b_1,b_2,...,b_n \in \Lambda$ be n linearly independent lattice vectors. Then $b_1, b_2,...,b_n$ form a basis of $\Lambda$ if and only if $P(b_1,b_2,...,b_n) \wedge \Lambda = \{ 0 \}$
 
 # Turing machine
-## euqailty between various Turing machine
-All of these are sequential storage Turing machine.
-### one tape Turing machine
 
-### two tapes Turing machine
+通常来说，图灵机是用于计算一个partional function的。但该函数族不可数，而图灵机的集合可数。因此必然有一些partional函数不可由图灵机计算。
+
+## Equailty between various Turing machine
+All of these are sequential storage Turing machine.
+### One tape Turing machine
+
+### Two tapes Turing machine
 
 ### K tapes Turing machine
 
-### oblivious Turing machine
+### Oblivious Turing machine
 这是一个重要的模型，是证明复杂度下界的重要手段，也揭示了circuit和TM之间的关系。
 
 理解上的难度主要在于oblivious，我认为翻译成不经意为佳，一个算法是oblivious的也就是说当找到解后并不停止，而是继续遍历其他的情况。以查找为例，典型的顺序查找可以实现为oblivious的，但二分查找就很难实现，因为每次查询范围由查询结果确定，找到结果后算法如何继续呢？
@@ -93,7 +96,17 @@ All of these are sequential storage Turing machine.
 
 这个定义比较好，如上所述，能精确的描述random bits，另一种投硬币的说法，不太正式。
 
-# reduction
+# Hierarchy Theorem
+
+## Time Hierarchy Theorem
+
+在引入Time Hierarchy之前，我们需要引入time-constructable，对于一个函数T，存在一个DTM，能在T(n)的时间内计算出T(n)，我们称其为time-constructable。一般来说，log n不是time-constructable的，因为O(log n)时间不足以读入全部n位输入。n，nlogn，$2^n$符合这一性质。但Ackermann函数不是，但是这个似乎不太能初等证明，需要递归可枚举等知识，<font color="red">留个坑</font>。
+
+我们之所以需要这个东西，是因为在time hierarchy的证明中，构造了一个有T(n)cells的TM，那么至少算出T(n)。
+
+## Space Hierarchy Theorem
+
+# Reduction
 ## LOGSPACE REDUCTION
 Informally, there is a $O(\log \lvert x \rvert)$ space machine that given input (x, i) outputs f(x) i-th bit provided $i \leq \lvert f(x) \rvert$. We say that f is implicitly logspace computable.
 
